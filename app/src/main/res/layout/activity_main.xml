@@ -135,6 +135,7 @@
 
                 <!-- Live Now Section -->
                 <TextView
+                    android:id="@+id/liveNowLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
@@ -156,6 +157,7 @@
 
                 <!-- Upcoming Section -->
                 <TextView
+                    android:id="@+id/upcomingLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
@@ -174,6 +176,53 @@
                     android:nestedScrollingEnabled="false"
                     android:paddingHorizontal="4dp"
                     tools:listitem="@layout/item_contest" />
+
+                <!-- Home Empty State — shown when no contests are visible for the selected day -->
+                <LinearLayout
+                    android:id="@+id/homeEmptyState"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="48dp"
+                    android:layout_marginBottom="24dp"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="32dp"
+                    android:visibility="gone">
+
+                    <!-- Icon -->
+                    <ImageView
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        android:alpha="0.35"
+                        android:src="@drawable/ic_timer"
+                        android:contentDescription="No contests"
+                        app:tint="@color/accent_purple" />
+
+                    <!-- Primary message -->
+                    <TextView
+                        android:id="@+id/homeEmptyTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:gravity="center"
+                        android:text="No contests scheduled"
+                        android:textColor="@color/text_primary"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <!-- Secondary message -->
+                    <TextView
+                        android:id="@+id/homeEmptySubtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"
+                        android:lineSpacingMultiplier="1.4"
+                        android:text="No contests are scheduled on this day."
+                        android:textColor="@color/text_muted"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
 
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>

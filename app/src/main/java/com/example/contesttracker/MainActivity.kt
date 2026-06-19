@@ -48,6 +48,11 @@ class MainActivity : AppCompatActivity() {
     
     private lateinit var emptyState: View
     private lateinit var remindersEmptyState: View
+    private lateinit var homeEmptyState: View
+    private lateinit var homeEmptyTitle: TextView
+    private lateinit var homeEmptySubtitle: TextView
+    private lateinit var liveNowLabel: View
+    private lateinit var upcomingLabel: View
     
     private val selectedPlatforms = Platform.entries.toMutableSet()
     private var selectedDayOffset = 0
@@ -168,6 +173,13 @@ class MainActivity : AppCompatActivity() {
         
         emptyState = scheduleLayout.findViewById(R.id.scheduleEmptyState)
         remindersEmptyState = remindersLayout.findViewById(R.id.remindersEmptyState)
+
+        // Home empty state views
+        homeEmptyState   = homeLayout.findViewById(R.id.homeEmptyState)
+        homeEmptyTitle   = homeLayout.findViewById(R.id.homeEmptyTitle)
+        homeEmptySubtitle = homeLayout.findViewById(R.id.homeEmptySubtitle)
+        liveNowLabel     = homeLayout.findViewById(R.id.liveNowLabel)
+        upcomingLabel    = homeLayout.findViewById(R.id.upcomingLabel)
     }
 
     private fun setupAdapters() {
@@ -448,7 +460,32 @@ class MainActivity : AppCompatActivity() {
 
         lAdapter.submitList(running)
         uAdapter.submitList(upcoming)
-        
+
+        // ── Home empty state logic ────────────────────────────────────────────────
+        val hasVisibleContests = running.isNotEmpty() || upcoming.isNotEmpty()
+
+        // Show / hide the section labels and RecyclerViews
+        liveNowLabel.isVisible  = hasVisibleContests
+        upcomingLabel.isVisible = hasVisibleContests
+        lAdapter.let { homeLayout.findViewById<View>(R.id.liveRecyclerView).isVisible = hasVisibleContests }
+        uAdapter.let { homeLayout.findViewById<View>(R.id.upcomingRecyclerView).isVisible = hasVisibleContests }
+
+        if (!hasVisibleContests) {
+            homeEmptyState.isVisible = true
+            if (filteredByDayAndPlatform.isEmpty()) {
+                // Nothing was ever scheduled on this day for the selected platforms
+                homeEmptyTitle.text   = getString(R.string.home_empty_no_contests_title)
+                homeEmptySubtitle.text = getString(R.string.home_empty_no_contests_subtitle)
+            } else {
+                // There were contests but they've all ended
+                homeEmptyTitle.text   = getString(R.string.home_empty_all_done_title)
+                homeEmptySubtitle.text = getString(R.string.home_empty_all_done_subtitle)
+            }
+        } else {
+            homeEmptyState.isVisible = false
+        }
+        // ──────────────────────────────────────────────────────────────
+
         sAdapter.submitContests(filteredByPlatform)
         emptyState.isVisible = filteredByPlatform.isEmpty()
         

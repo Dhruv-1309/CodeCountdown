@@ -26,4 +26,10 @@
     <string name="channel_stable">Stable</string>
     <string name="channel_beta">Beta</string>
     <string name="check_for_updates">Check for Updates</string>
+
+    <!-- Home screen empty state strings -->
+    <string name="home_empty_no_contests_title">No contests scheduled</string>
+    <string name="home_empty_no_contests_subtitle">There are no contests on this day for the selected platforms. Try selecting a different day or enabling more platforms.</string>
+    <string name="home_empty_all_done_title">You\'re all caught up!</string>
+    <string name="home_empty_all_done_subtitle">All contests for this day have ended. Check back tomorrow or switch to a future day.</string>
 </resources>
