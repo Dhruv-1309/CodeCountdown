@@ -1,0 +1,56 @@
+name: Refresh contest feed
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: contest-feed-pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      CLIST_USERNAME: ${{ secrets.CLIST_USERNAME }}
+      CLIST_API_KEY: ${{ secrets.CLIST_API_KEY }}
+    steps:
+      - name: Validate configuration
+        shell: bash
+        run: |
+          if [[ -z "$CLIST_USERNAME" || -z "$CLIST_API_KEY" ]]; then
+            echo "CLIST_USERNAME and CLIST_API_KEY repository secrets are required."
+            exit 1
+          fi
+
+      - name: Fetch and sanitize contests
+        shell: bash
+        run: |
+          mkdir -p public
+          curl --fail --silent --show-error --retry 3 \
+            --header "Authorization: ApiKey ${CLIST_USERNAME}:${CLIST_API_KEY}" \
+            "https://clist.by/api/v4/contest/?upcoming=true&resource_id__in=1%2C102%2C2%2C93&limit=100" \
+            | jq '{objects: [.objects[] | {id, event, resource_id, start, end, duration, href}]}' \
+            > public/contests.json
+          jq --exit-status '.objects | type == "array"' public/contests.json > /dev/null
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload contest feed
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - name: Deploy contest feed
+        id: deployment
+        uses: actions/deploy-pages@v4

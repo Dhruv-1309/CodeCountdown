@@ -21,18 +21,12 @@ class ContestViewModel(application: Application) : AndroidViewModel(application)
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
 
-    fun loadContests(username: String, apiKey: String) {
-        if (username.isBlank() || apiKey.isBlank()) {
-            _contests.value = emptyList()
-            _errorMessage.value = "Add your Clist.by API credentials in Settings to load contests."
-            return
-        }
-
+    fun loadContests() {
         _isLoading.value = true
         _errorMessage.value = null
 
         viewModelScope.launch {
-            repository.fetchUpcomingContests(username, apiKey)
+            repository.fetchUpcomingContests()
                 .onSuccess { upcoming ->
                     _contests.value = upcoming
                     scheduler.scheduleAll(upcoming)
@@ -52,9 +46,9 @@ class ContestViewModel(application: Application) : AndroidViewModel(application)
                         }
                         exception is HttpException -> {
                             when (exception.code()) {
-                                401 -> "Invalid API credentials. Please check your CLIST settings."
-                                403 -> "Access denied. Please check your CLIST API account permissions."
-                                in 500..599 -> "CLIST servers are currently down. Please try again later."
+                                403 -> "Contest data is temporarily unavailable. Please try again later."
+                                404 -> "Contest feed is not available yet. Please try again later."
+                                in 500..599 -> "Contest service is currently down. Please try again later."
                                 else -> "Could not retrieve contests (Error ${exception.code()}). Please try again."
                             }
                         }

@@ -143,10 +143,20 @@ app/src/main/java/com/example/contesttracker/
 
 ## 🔒 Security
 
+- CLIST credentials are stored only as GitHub Actions secrets and never shipped in the APK
+- A scheduled GitHub Pages workflow publishes a credential-free contest feed for the app
 - APK downloads are verified using **SHA-256** checksums published alongside each release
 - All network communication uses **HTTPS**
 - The APK installer uses Android's **FileProvider** — no `file://` URIs exposed
 - No user data is sent to any external server
+
+### Maintainer setup for the contest feed
+
+1. Add `CLIST_USERNAME` and `CLIST_API_KEY` in the repository's **Settings → Secrets and variables → Actions** page.
+2. In **Settings → Pages**, select **GitHub Actions** as the deployment source.
+3. Run the **Refresh contest feed** workflow once and confirm that
+   `https://dhruv-1309.github.io/CodeCountdown/contests.json` returns JSON.
+4. Revoke the previously embedded CLIST API key and replace the `CLIST_API_KEY` secret with a newly generated key.
 
 ---
 

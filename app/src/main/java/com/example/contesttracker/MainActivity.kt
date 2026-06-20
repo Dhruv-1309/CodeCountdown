@@ -391,7 +391,7 @@ class MainActivity : AppCompatActivity() {
 
             applyAppTheme(selectedTheme)
             Toast.makeText(this, "Settings Saved", Toast.LENGTH_SHORT).show()
-            viewModel.loadContests(SettingsActivity.HARDCODED_USER, SettingsActivity.HARDCODED_KEY)
+            viewModel.loadContests()
         }
 
         // ── App Updates section ────────────────────────────────────────────
@@ -537,7 +537,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadInitialData() {
-        viewModel.loadContests(SettingsActivity.HARDCODED_USER, SettingsActivity.HARDCODED_KEY)
+        viewModel.loadContests()
     }
 
     private fun openContest(url: String) {
@@ -549,4 +549,3 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
-

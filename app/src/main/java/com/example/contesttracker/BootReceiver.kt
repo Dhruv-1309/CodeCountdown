@@ -35,7 +35,7 @@ class BootReceiver : BroadcastReceiver() {
                 var success = false
                 while (attempts < 3 && !success) {
                     attempts++
-                    repository.fetchUpcomingContests(SettingsActivity.HARDCODED_USER, SettingsActivity.HARDCODED_KEY)
+                    repository.fetchUpcomingContests()
                         .onSuccess { contests ->
                             Log.d("BootReceiver", "Successfully fetched contests from network. Updating schedule.")
                             scheduler.scheduleAll(contests)

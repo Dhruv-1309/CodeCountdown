@@ -7,9 +7,6 @@
     <string name="live_now_section">LIVE NOW</string>
     <string name="upcoming_today_section">UPCOMING TODAY</string>
     <string name="no_contests_scheduled">No contests scheduled</string>
-    <string name="api_configuration">Clist.by Credentials</string>
-    <string name="clist_username_hint">Username</string>
-    <string name="clist_api_key_hint">API Key</string>
     <string name="save_settings">Save Settings</string>
     <string name="platforms_section">Platforms</string>
     <string name="about_title">ABOUT</string>
