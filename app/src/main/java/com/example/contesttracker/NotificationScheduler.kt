@@ -70,7 +70,12 @@ class NotificationScheduler(private val context: Context) {
     }
 
     private fun schedule(contest: ContestModel, timeMillis: Long, typeOffset: Int, body: String) {
-        val notificationId = (contest.id.toInt() * 10) + typeOffset
+        // contest.id is a Long from the Clist API and can be very large (e.g. 17xxxxxx).
+        // Directly casting to Int and multiplying overflows into negative / duplicate values,
+        // which causes PendingIntents (and therefore alarms) to silently overwrite each other.
+        // We take the positive modulo first to guarantee a safe, unique-enough Int bucket.
+        val safeId = (contest.id % Int.MAX_VALUE).toInt().and(0x7FFF_FFFF)
+        val notificationId = (safeId * 10) + typeOffset
         val intent = Intent(context, NotificationReceiver::class.java).apply {
             putExtra("contest_name", contest.name)
             putExtra("platform", contest.platform.displayName)
@@ -106,7 +111,8 @@ class NotificationScheduler(private val context: Context) {
 
     private fun cancelForContest(contest: ContestModel) {
         listOf(1, 2).forEach { offset ->
-            val notificationId = (contest.id.toInt() * 10) + offset
+            val safeId = (contest.id % Int.MAX_VALUE).toInt().and(0x7FFF_FFFF)
+            val notificationId = (safeId * 10) + offset
             val intent = Intent(context, NotificationReceiver::class.java)
             val pendingIntent = PendingIntent.getBroadcast(
                 context,

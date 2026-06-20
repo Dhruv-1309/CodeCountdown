@@ -1,8 +1,11 @@
 package com.example.contesttracker
 
+import android.app.AlarmManager
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ProgressBar
@@ -141,7 +144,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkNotificationPermission() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+        // ── POST_NOTIFICATIONS (Android 13+) ─────────────────────────────────
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
                     this,
                     android.Manifest.permission.POST_NOTIFICATIONS
@@ -152,6 +156,23 @@ class MainActivity : AppCompatActivity() {
                     arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
                     1001
                 )
+            }
+        }
+
+        // ── SCHEDULE_EXACT_ALARM (Android 12+) ───────────────────────────────
+        // This special permission is NOT auto-granted even when declared in the
+        // manifest. Without it the AlarmManager silently falls back to inexact
+        // alarms which Android may skip or heavily defer during Doze mode.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(AlarmManager::class.java)
+            if (!alarmManager.canScheduleExactAlarms()) {
+                // Deep-link to the system "Alarms & Reminders" settings page for
+                // this app so the user can grant the permission with one tap.
+                val intent = Intent(
+                    Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                    Uri.parse("package:$packageName")
+                )
+                startActivity(intent)
             }
         }
     }
@@ -354,10 +375,20 @@ class MainActivity : AppCompatActivity() {
             }
             edit.apply()
             
+            val scheduler = NotificationScheduler(this)
             if (!enableNotifications) {
-                NotificationScheduler(this).cancelAll(viewModel.contests.value ?: emptyList())
+                scheduler.cancelAll(viewModel.contests.value ?: emptyList())
+            } else {
+                // Immediately reschedule from the in-memory list, or fall back to the
+                // on-disk cache so that alarms are set even if the upcoming API call fails.
+                val contestsToSchedule = viewModel.contests.value
+                    ?.takeIf { it.isNotEmpty() }
+                    ?: scheduler.getCachedContests()
+                if (contestsToSchedule.isNotEmpty()) {
+                    scheduler.scheduleAll(contestsToSchedule)
+                }
             }
-            
+
             applyAppTheme(selectedTheme)
             Toast.makeText(this, "Settings Saved", Toast.LENGTH_SHORT).show()
             viewModel.loadContests(SettingsActivity.HARDCODED_USER, SettingsActivity.HARDCODED_KEY)
