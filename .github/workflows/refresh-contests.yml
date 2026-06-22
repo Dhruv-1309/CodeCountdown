@@ -36,9 +36,39 @@ jobs:
         shell: bash
         run: |
           mkdir -p public
-          curl --fail --silent --show-error --retry 3 \
-            --header "Authorization: ApiKey ${CLIST_USERNAME}:${CLIST_API_KEY}" \
-            "https://clist.by/api/v4/contest/?upcoming=true&resource_id__in=1%2C102%2C2%2C93&limit=100" \
+
+          api_url="https://clist.by/api/v4/contest/?upcoming=true&resource_id__in=1%2C102%2C2%2C93&limit=100"
+          trim_whitespace() {
+            local value="$1"
+            value="${value#"${value%%[![:space:]]*}"}"
+            value="${value%"${value##*[![:space:]]}"}"
+            printf '%s' "$value"
+          }
+
+          clist_username="$(trim_whitespace "$CLIST_USERNAME")"
+          clist_api_key="$(trim_whitespace "$CLIST_API_KEY")"
+          if [[ "$clist_api_key" == *:* ]]; then
+            auth_credential="$clist_api_key"
+          else
+            auth_credential="${clist_username}:${clist_api_key}"
+          fi
+
+          if ! contest_payload="$(curl --fail --silent --show-error --retry 3 \
+            --header "Authorization: ApiKey ${auth_credential}" \
+            "$api_url")"; then
+            echo "Header-based CLIST auth failed, retrying with query-parameter auth." >&2
+            if ! contest_payload="$(curl --fail --silent --show-error --retry 3 --get \
+              --data-urlencode "username=${clist_username}" \
+              --data-urlencode "api_key=${clist_api_key}" \
+              "$api_url")"; then
+              echo "Unable to fetch contests from CLIST API using header or query auth." >&2
+              echo "Set CLIST_USERNAME and CLIST_API_KEY in repository secrets." >&2
+              echo "See README.md > Maintainer setup for the contest feed." >&2
+              exit 1
+            fi
+          fi
+
+          printf '%s' "$contest_payload" \
             | jq '{objects: [.objects[] | {id, event, resource_id, start, end, duration, href}]}' \
             > public/contests.json
           jq --exit-status '.objects | type == "array"' public/contests.json > /dev/null
