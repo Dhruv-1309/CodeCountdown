@@ -124,6 +124,20 @@
                     app:thumbTint="@color/accent_purple"
                     app:trackTint="@color/border" />
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFixAlarmPermission"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="16dp"
+                    android:text="Fix Alarm Permission"
+                    android:textAllCaps="false"
+                    android:textColor="@color/accent_purple"
+                    android:textSize="15sp"
+                    android:visibility="gone"
+                    app:cornerRadius="14dp"
+                    app:strokeColor="@color/accent_purple" />
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

@@ -350,6 +350,25 @@ class MainActivity : AppCompatActivity() {
         val notificationSwitch = settingsLayout.findViewById<MaterialSwitch>(R.id.switchEnableNotifications)
         notificationSwitch.isChecked = prefs.getBoolean("enable_notifications", true)
         
+        val btnFixAlarm = settingsLayout.findViewById<MaterialButton>(R.id.btnFixAlarmPermission)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(AlarmManager::class.java)
+            if (!alarmManager.canScheduleExactAlarms()) {
+                btnFixAlarm.isVisible = true
+                btnFixAlarm.setOnClickListener {
+                    val exactAlarmIntent = Intent(
+                        Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                        Uri.parse("package:$packageName")
+                    )
+                    startActivity(exactAlarmIntent)
+                }
+            } else {
+                btnFixAlarm.isVisible = false
+            }
+        } else {
+            btnFixAlarm.isVisible = false
+        }
+
         // Theme Selection
         val themeChipGroup = settingsLayout.findViewById<ChipGroup>(R.id.themeChipGroup)
         val savedTheme = prefs.getString("app_theme", "system") ?: "system"
