@@ -5,16 +5,16 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Cyan Arc -->
+    <!-- Arc -->
     <path
-        android:strokeColor="#00D1D1"
+        android:strokeColor="#000000"
         android:strokeWidth="6"
         android:strokeLineCap="butt"
         android:pathData="M 33,33 A 30,30 0 1,1 33,75" />
 
     <!-- Left Bracket < -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#000000"
         android:strokeWidth="6"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
@@ -22,7 +22,7 @@
 
     <!-- Right Bracket > -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#000000"
         android:strokeWidth="6"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
