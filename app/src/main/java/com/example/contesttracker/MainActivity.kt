@@ -110,6 +110,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        if (::homeLayout.isInitialized && homeLayout.isVisible) {
+            liveAdapter?.startCountdown()
+            upcomingAdapter?.startCountdown()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        liveAdapter?.stopCountdown()
+        upcomingAdapter?.stopCountdown()
+    }
+
     /**
      * Called when MainActivity is already at the top of the stack and a new
      * intent arrives (e.g. from DownloadCompleteReceiver after a download).
@@ -249,6 +263,15 @@ class MainActivity : AppCompatActivity() {
         scheduleLayout.isVisible = target == scheduleLayout
         remindersLayout.isVisible = target == remindersLayout
         settingsLayout.isVisible = target == settingsLayout
+        
+        if (target == homeLayout) {
+            liveAdapter?.startCountdown()
+            upcomingAdapter?.startCountdown()
+        } else {
+            liveAdapter?.stopCountdown()
+            upcomingAdapter?.stopCountdown()
+        }
+        
         return true
     }
 
@@ -534,6 +557,14 @@ class MainActivity : AppCompatActivity() {
 
         lAdapter.submitList(running)
         uAdapter.submitList(upcoming)
+
+        if (homeLayout.isVisible) {
+            lAdapter.startCountdown()
+            uAdapter.startCountdown()
+        } else {
+            lAdapter.stopCountdown()
+            uAdapter.stopCountdown()
+        }
 
         // ── Home empty state logic ────────────────────────────────────────────────
         val hasVisibleContests = running.isNotEmpty() || upcoming.isNotEmpty()
