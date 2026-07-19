@@ -561,12 +561,26 @@ class MainActivity : AppCompatActivity() {
         sAdapter.submitContests(filteredByPlatform)
         emptyState.isVisible = filteredByPlatform.isEmpty()
         
-        val remindersList = filteredByPlatform.filter { 
+        val remindersList = filteredByDayAndPlatform.filter {
             val startMillis = ContestTimeUtils.startTimeMillis(it.start) ?: 0
-            startMillis > now 
+            startMillis > now
         }
         rAdapter.submitContests(remindersList)
-        remindersEmptyState.isVisible = remindersList.isEmpty()
+        
+        val areNotificationsEnabled = getSharedPreferences("app_prefs", MODE_PRIVATE)
+            .getBoolean("enable_notifications", true)
+            
+        if (!areNotificationsEnabled) {
+            remindersEmptyState.isVisible = true
+            remindersLayout.findViewById<TextView>(R.id.remindersEmptyTitle)?.text = getString(R.string.reminders_empty_no_notif_title)
+            remindersLayout.findViewById<TextView>(R.id.remindersEmptySubtitle)?.text = getString(R.string.reminders_empty_no_notif_subtitle)
+        } else if (remindersList.isEmpty()) {
+            remindersEmptyState.isVisible = true
+            remindersLayout.findViewById<TextView>(R.id.remindersEmptyTitle)?.text = getString(R.string.reminders_empty_title)
+            remindersLayout.findViewById<TextView>(R.id.remindersEmptySubtitle)?.text = getString(R.string.reminders_empty_subtitle)
+        } else {
+            remindersEmptyState.isVisible = false
+        }
     }
 
 
