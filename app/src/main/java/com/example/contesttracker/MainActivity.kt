@@ -59,7 +59,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var staleBanner: TextView
     
     private val selectedPlatforms = Platform.entries.toMutableSet()
-    private var selectedDayOffset = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Read and apply theme preference before layout inflation
@@ -269,40 +268,11 @@ class MainActivity : AppCompatActivity() {
             adapter = upcomingAdapter
         }
 
-        val dayChipGroup: ChipGroup = findViewById(R.id.dayChipGroup)
-        dayChipGroup.removeAllViews()
-        val chipBg = ContextCompat.getColorStateList(this, R.color.selector_chip_bg)
+        val chipBg   = ContextCompat.getColorStateList(this, R.color.selector_chip_bg)
         val chipText = ContextCompat.getColorStateList(this, R.color.selector_chip_text)
-        
-        val sdfLabel = SimpleDateFormat("EEE", Locale.getDefault())
-        for (offset in 0..6) {
-            val label = when (offset) {
-                0 -> "Today"
-                1 -> "Tomorrow"
-                else -> {
-                    val tempCal = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, offset) }
-                    sdfLabel.format(tempCal.time)
-                }
-            }
-            val chip = Chip(this).apply {
-                text = label
-                isCheckable = true
-                chipBackgroundColor = chipBg
-                setTextColor(chipText)
-                chipStrokeWidth = 0f
-                
-                setOnCheckedChangeListener { _, isChecked ->
-                    if (isChecked) {
-                        selectedDayOffset = offset
-                        applyFilters()
-                    }
-                }
-            }
-            dayChipGroup.addView(chip)
-        }
-        (dayChipGroup.getChildAt(0) as? Chip)?.isChecked = true
 
         val platformChipGroup: ChipGroup = findViewById(R.id.platformChipGroup)
+
         val allChip = Chip(this).apply {
             text = "All"
             isCheckable = true
@@ -531,13 +501,7 @@ class MainActivity : AppCompatActivity() {
         val filteredByPlatform = contests?.filter { it.platform?.let { p -> p in selectedPlatforms } == true } ?: emptyList()
         val now = System.currentTimeMillis()
 
-        val targetDay = getTargetDayString(selectedDayOffset)
-
-        val filteredByDayAndPlatform = filteredByPlatform.filter {
-            val startMillis = ContestTimeUtils.startTimeMillis(it.start) ?: 0
-            val contestDay = SimpleDateFormat("yyyyMMdd", Locale.US).format(Date(startMillis))
-            contestDay == targetDay
-        }
+        val filteredByDayAndPlatform = filteredByPlatform
 
         val running = filteredByDayAndPlatform.filter { 
             val start = ContestTimeUtils.startTimeMillis(it.start) ?: 0
@@ -589,19 +553,12 @@ class MainActivity : AppCompatActivity() {
         
         val remindersList = filteredByPlatform.filter { 
             val startMillis = ContestTimeUtils.startTimeMillis(it.start) ?: 0
-            val contestDay = SimpleDateFormat("yyyyMMdd", Locale.US).format(Date(startMillis))
-            contestDay == targetDay && startMillis > now 
+            startMillis > now 
         }
         rAdapter.submitContests(remindersList)
         remindersEmptyState.isVisible = remindersList.isEmpty()
     }
 
-    private fun getTargetDayString(offset: Int): String {
-        val cal = Calendar.getInstance().apply {
-            add(Calendar.DAY_OF_YEAR, offset)
-        }
-        return SimpleDateFormat("yyyyMMdd", Locale.US).format(cal.time)
-    }
 
     private fun loadInitialData() {
         viewModel.loadContests()
